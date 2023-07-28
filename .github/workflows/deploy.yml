@@ -17,5 +17,11 @@ jobs:
         REMOTE_HOST: ${{secrets.HOST}}
         REMOTE_USER: ${{secrets.USER}}
       run: |
-        ssh -i PedalHub_CI_RSA.pem -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "mkdir -p /home/ec2-user/PedalHubApi"
-        scp -i PedalHub_CI_RSA.pem -o StrictHostKeyChecking=no -r ./ $REMOTE_USER@$REMOTE_HOST:/home/ec2-user/PedalHubApi/
+        echo "$SSH_PRIVATE_KEY" > ssh_key.pem
+        chmod 600 ssh_key.pem
+        ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
+
+        # Usando o arquivo de chave SSH do segredo "EC2_SSH_KEY"
+        ssh -i ssh_key.pem -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "mkdir -p /home/ec2-user/PedalHubApi"
+        scp -i ssh_key.pem -o StrictHostKeyChecking=no -r ./ $REMOTE_USER@$REMOTE_HOST:/home/ec2-user/PedalHubApi/
