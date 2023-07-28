@@ -14,11 +14,8 @@ jobs:
 
     - name: Copy files with SSH
       uses: easingthemes/ssh-deploy@main
-      env: 
-        SSH_PRIVATE_KEY: ${{secrets.EC2_SSH_KEY}}
-        REMOTE_HOST: ${{secrets.HOST}}
-        REMOTE_USER: ${{secrets.USER}}
-        ARGS: "-rltgoDzvO --delete"
-        SOURCE: "./"
-        TARGET: "/home/ec2-user"
-        EXCLUDE: "/dist/, /node_modules/, **.env"
+      run: |
+        mkdir -p /home/ec2-user/PedalHubApi
+        echo "$SSH_PRIVATE_KEY" > ssh_key.pem
+        chmod 600 ssh_key.pem
+        scp -i ssh_key.pem -o StrictHostKeyChecking=no -r ./ ec2-user@$REMOTE_HOST:/home/ec2-user/PedalHubApi
