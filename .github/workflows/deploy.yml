@@ -11,7 +11,7 @@ jobs:
     - name: Checkout the files
       uses: actions/checkout@v3
 
-    - name: Copy files with SSH
+    - name: Create and Copy files with SSH
       env: 
         SSH_PRIVATE_KEY: ${{secrets.EC2_SSH_KEY}}
         REMOTE_HOST: ${{secrets.HOST}}
@@ -24,5 +24,21 @@ jobs:
         ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts
         chmod 644 ~/.ssh/known_hosts
 
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "mkdir -p /home/ec2-user/PedalHubApi"
-        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./ $REMOTE_USER@$REMOTE_HOST:/home/ec2-user/PedalHubApi/
+        # Create a temporary directory to store the files to be copied
+        TEMP_DIR=$(mktemp -d)
+
+        # Copy the necessary files to the temporary directory
+        cp -r ./ $TEMP_DIR/
+
+        # Compress the files into a zip archive
+        cd $TEMP_DIR
+        zip -r files_to_copy.zip .
+
+        # Copy the zip archive to the remote host's PedalHubApi directory
+        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no files_to_copy.zip $REMOTE_USER@$REMOTE_HOST:/home/ec2-user/PedalHubApi/
+
+        # Connect to the remote host and extract the files from the zip archive
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "cd /home/ec2-user/PedalHubApi && unzip -o files_to_copy.zip"
+
+        # Clean up - remove the temporary directory and zip archive
+        rm -rf $TEMP_DIR
