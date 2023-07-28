@@ -21,4 +21,4 @@ jobs:
         mkdir -p /home/ec2-user/PedalHubApi
         echo "$SSH_PRIVATE_KEY" > ssh_key.pem
         chmod 600 ssh_key.pem
-        scp -i ssh_key.pem -o StrictHostKeyChecking=no -r ./ ec2-user@$REMOTE_HOST:/home/ec2-user/PedalHubApi
+        scp -i ssh_key.pem -o StrictHostKeyChecking=no -r ./ ec2-user@$REMOTE_HOST:/home/ec2-user/
