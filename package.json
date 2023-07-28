@@ -1,6 +1,6 @@
 {
-  "name": "tester",
-  "version": "1.0.0",
+  "name": "pedalhubapi",
+  "version": "3.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
