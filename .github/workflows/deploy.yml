@@ -9,15 +9,15 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: checkout the files
+    - name: Checkout the files
     - uses: actions/checkout@v3
 
     - name: Copy files with SSH
       uses: easingthemes/ssh-deploy@main
       env: 
         SSH_PRIVATE_KEY: ${{secrets.EC2_SSH_KEY}}
-        REMOTE_HOST: ${{secretes.HOST}}
-        REMOTE_USER: ${{secretes.USER}}
+        REMOTE_HOST: ${{secrets.HOST}}
+        REMOTE_USER: ${{secrets.USER}}
         ARGS: "-rltgoDzvO --delete"
         SOURCE: "./"
         TARGET: "/home/ec2-user"
