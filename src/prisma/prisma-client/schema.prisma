@@ -1,0 +1,41 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./prisma-client"
+}
+
+model User {
+  id            Int           @id @default(autoincrement())
+  name          String
+  email         String        @unique
+  password      String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  subscriptions Subscription[]
+  isAdmin       Boolean       @default(false)
+}
+
+model Ride {
+  id                      Int   @id @default(autoincrement())
+  name                    String
+  start_date_registration String
+  end_date_registration   String
+  start_date              String
+  additional_information  String?
+  start_place             String
+  participants_limit      Int?
+  subscribers             Subscription[]
+}
+
+model Subscription {
+  id              Int   @id @default(autoincrement())
+  ride            Ride     @relation(fields: [ride_id], references: [id])
+  ride_id          Int
+  user            User     @relation(fields: [user_id], references: [id])
+  user_id          Int
+  subscription_date DateTime @default(now())
+}
