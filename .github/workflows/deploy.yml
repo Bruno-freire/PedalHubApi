@@ -1,4 +1,3 @@
-name: Push-to-EC2
 on:
   push:
     branches:
@@ -18,7 +17,8 @@ jobs:
         REMOTE_HOST: ${{secrets.HOST}}
         REMOTE_USER: ${{secrets.USER}}
       run: |
-        mkdir -p /home/ec2-user/PedalHubApi
-        echo "$SSH_PRIVATE_KEY" > ssh_key.pem
-        chmod 600 ssh_key.pem
-        scp -i ssh_key.pem -o StrictHostKeyChecking=no -r ./ ec2-user@$REMOTE_HOST:/home/ec2-user/
+        ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts  # Adicione essa linha para evitar problemas de chave de host desconhecida.
+
+        ssh -i ssh_key.pem -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "mkdir -p /home/ec2-user/PedalHubApi"
+        scp -i ssh_key.pem -o StrictHostKeyChecking=no -r ./ $REMOTE_USER@$REMOTE_HOST:/home/ec2-user/PedalHubApi/
+
