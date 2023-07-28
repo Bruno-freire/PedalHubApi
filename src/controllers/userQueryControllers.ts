@@ -19,14 +19,8 @@ export const users = async (parent: any, args: any, context: any): Promise<User[
 
   return usersWithSubscribedRides;
 };
-
-
-export const userRides = (parent: any, args: any): Promise<Ride[]> => {
-  const { user_id } = args;
-  return prisma.ride.findMany({ where: { subscribers: { some: { user_id: user_id } } } });
-}
   
 export const userSubscriptions = (parent: any, args: { user_id: number }): Promise<Subscription[]> => {
   const { user_id } = args;
-  return prisma.subscription.findMany({ where: { user_id: user_id }, include: {ride: true} });
+  return prisma.subscription.findMany({ where: { user_id: user_id }, include: {ride: true, user: true} });
 };

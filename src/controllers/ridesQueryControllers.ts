@@ -2,15 +2,19 @@ import { PrismaClient, Ride, Subscription, User } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export const rides = async (): Promise<(Ride & { subscribers: (Subscription & { user: User })[] })[] | null> => {
+export const rides = async (): Promise<Ride[] | null> => {
   const rides = await prisma.ride.findMany({
     include: {
       subscribers: {
         include: {
-          user: true
-        }
-      }
-    }
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (rides.length === 0) {
@@ -19,9 +23,6 @@ export const rides = async (): Promise<(Ride & { subscribers: (Subscription & { 
 
   return rides.map(ride => ({
     ...ride,
-    subscribers: ride.subscribers.map(subscription => ({
-      ...subscription,
-      user: subscription.user || null
-    })) || []
+    subscribers: ride.subscribers.filter(subscription => subscription.user !== null),
   }));
 };

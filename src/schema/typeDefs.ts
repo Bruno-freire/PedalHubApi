@@ -25,6 +25,8 @@ export const typeDefs = `#graphql
     id: Int!
     ride: Ride!
     user: User!
+    user_id: Int!
+    ride_id: Int!
     subscription_date: String!
   }
   
