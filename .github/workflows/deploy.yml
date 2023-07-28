@@ -17,11 +17,12 @@ jobs:
         REMOTE_HOST: ${{secrets.HOST}}
         REMOTE_USER: ${{secrets.USER}}
       run: |
-        echo "$SSH_PRIVATE_KEY" > ssh_key.pem
-        chmod 600 ssh_key.pem
+        mkdir -p ~/.ssh  # Create the .ssh directory if it doesn't exist
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
 
         ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts
         chmod 644 ~/.ssh/known_hosts
 
-        ssh -i ssh_key.pem -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "mkdir -p /home/ec2-user/PedalHubApi"
-        scp -i ssh_key.pem -o StrictHostKeyChecking=no -r ./ $REMOTE_USER@$REMOTE_HOST:/home/ec2-user/PedalHubApi/
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "mkdir -p /home/ec2-user/PedalHubApi"
+        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./ $REMOTE_USER@$REMOTE_HOST:/home/ec2-user/PedalHubApi/
