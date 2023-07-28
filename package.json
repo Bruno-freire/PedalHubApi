@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "compile": "npm install && tsc",
+    "compile": "npm install && npx prisma generate && tsc",
     "start": "node ./dist/index.js"
   },
   "keywords": [],
