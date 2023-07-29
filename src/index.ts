@@ -6,7 +6,7 @@ import http from 'http';
 import cors from 'cors';
 import morgan from 'morgan'
 import { resolvers } from './resolvers/index.js'
-import { typeDefs } from './schema/typeDefs.js';
+import { typeDefs } from './typeDefs/index.js';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { JwtPayload } from 'jsonwebtoken';
@@ -61,4 +61,4 @@ app.use(
 );
 
 await new Promise<void>((resolve) => httpServer.listen(process.env.PORT || { port: 4000 }, resolve));
-console.log(`🚀 Server ready at http://localhost:4000/graphql`);
+console.log(`🚀 Server ready at http://localhost:${process.env.PORT || 4000}/graphql`);

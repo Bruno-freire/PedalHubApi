@@ -5,6 +5,7 @@ dotenv.config()
 const prisma = new PrismaClient();
 const secret = process.env.JWT_TOKEN
 import jwt from 'jsonwebtoken'
+import { validateAndTransformEmail } from '../utils/validatedEmail.js';
 
 interface CreateUserInput {
   name: string;
@@ -20,7 +21,8 @@ interface UpdateUserInput {
 
 export const login = async (parent: any, args: {email: string, password: string}): Promise<{token: string, user: User}> => {
   const {email, password} = args
-  const user = await prisma.user.findUnique({where: {email}, include: {subscriptions: true}})
+  const formatedEmail = validateAndTransformEmail(email)
+  const user = await prisma.user.findUnique({where: {email: formatedEmail}, include: {subscriptions: true}})
   if(!user){
     throw new Error("invalid email or password");
   }
@@ -35,6 +37,7 @@ export const login = async (parent: any, args: {email: string, password: string}
 
 export const createUser = (parent: any, args: { input: CreateUserInput }): Promise<User> => {
   const { input } = args;
+  input.email = validateAndTransformEmail(input.email)
   return prisma.user.create({ data: input });
 }
 
