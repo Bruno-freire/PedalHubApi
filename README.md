@@ -35,20 +35,19 @@ The API has three main data models:
 
 The API supports the following queries:
 
-    users: Retrieves a list of all registered users.
-    rides: Retrieves a list of all available rides (pedals).
-    userRides(user_id): Retrieves a list of rides created by a specific user (identified by user_id).
+    users(Attention, for this command you must be logged in as an administrator): Retrieves a list of all registered users.
+    rides: Retrieves a list of all available rides (pedals). It is also possible to see the names of the participants of each ride
     userSubscriptions(user_id): Retrieves a list of rides to which a user (identified by user_id) has subscribed.
 
 # Mutations
 
 The API provides the following mutations:
 
-    createUser(input): Creates a new user with the specified name, email, and password.
-    updateUser(input): Updates the information of an existing user (identified by user ID). Users can update their name, email, or password.
-    deleteUser: Deletes the authenticated user account.
-    createRide(input): Creates a new cycling group ride (pedal) with the provided details.
-    subscribeRide(input): Subscribes the authenticated user to a specific ride (identified by ride_id).
+    createUser(input: email, password, name): Creates a new user with the specified name, email, and password.
+    updateUser(input: email?, password?, name?): Updates the information of an existing user (identified by the authenticated user). Users can update their name, email, or password.
+    deleteUser(identified by the authenticated user): Deletes the authenticated user account.
+    createRide(input: name, start_date, start_date_registration, end_date_registration, additional_information?, start_place, participants_limit?): Creates a new cycling group ride (pedal) with the provided details.Accepted date format "yyyymmdd"
+    subscribeRide(input: ride_id): Subscribes the authenticated user to a specific ride (identified by ride_id).
     login(email, password): Authenticates the user with the provided email and password, returning an authentication token and user details.
 
 # Authentication
@@ -57,6 +56,7 @@ The API uses JWT (JSON Web Tokens) for authentication. To access any authenticat
 
 # Getting Started
 
+    This server is online at https://pedalhubapi.onrender.com/graphql but to run it locally follow the steps below.
     Install PostgreSQL and create a new database.
     Set the database URL in the .env file using the DATABASE_URL variable.
     Install the required dependencies using npm or yarn.
@@ -75,14 +75,14 @@ The API uses JWT (JSON Web Tokens) for authentication. To access any authenticat
 
 # Dependencies
 
-The main dependencies used in this API are:
+Install Production Dependencies:
 
-    Apollo Server 4: For setting up the GraphQL server.
-    Prisma: As an ORM to interact with the PostgreSQL database.
-    Express: For creating the server and handling middleware.
-    JWT: For user authentication using JSON Web Tokens.
-    TypeScript: To add static typing and enhance the development experience.
+    npm install @apollo/server @prisma/client @types/morgan body-parser cors dotenv express graphql jsonwebtoken morgan prisma typescript
 
-Author
+Install Development Dependencies:
+
+    npm install --save-dev @types/cors @types/express @types/jsonwebtoken @types/node
+
+# Author
 
 This API is developed and maintained by Bruno Freire. If you have any questions or feedback, please contact me.
