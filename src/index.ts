@@ -61,4 +61,4 @@ app.use(
 );
 
 await new Promise<void>((resolve) => httpServer.listen(process.env.PORT || { port: 4000 }, resolve));
-console.log(`🚀 Server ready at http://localhost:${process.env.PORT || 4000}/graphql`);
+console.log(`🚀 Server ready at ${process.env.PORT ? "https://pedalhubapi.onrender.com/graphql" : "http://localhost:4000/graphql"}`)
