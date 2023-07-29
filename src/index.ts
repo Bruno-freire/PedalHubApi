@@ -5,7 +5,7 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import morgan from 'morgan'
-import { resolvers } from './schema/resolvers.js'
+import { resolvers } from './resolvers/index.js'
 import { typeDefs } from './schema/typeDefs.js';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
