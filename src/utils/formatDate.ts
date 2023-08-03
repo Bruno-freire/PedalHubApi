@@ -20,6 +20,6 @@ export const formatDate = (dataString: string): string | null => {
 
   const formattedDate = date.toISOString();
 
-  // Retorna a string formatada (apenas a parte de data, sem o horário)
+  // Returns the formatted string (only the date part, no time)
   return formattedDate
 }

@@ -1,4 +1,4 @@
-import { PrismaClient, Ride, Subscription, User } from '@prisma/client';
+import { PrismaClient, Ride, Subscription } from '@prisma/client';
 import { formatDate } from '../utils/formatDate.js';
 
 const prisma = new PrismaClient();
