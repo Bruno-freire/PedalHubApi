@@ -1,8 +1,3 @@
-on:
-  push:
-    branches:
-      - main
-
 jobs:
   deploy:
     name: Deploy to EC2 Windows
@@ -12,40 +7,14 @@ jobs:
       - name: Checkout the files
         uses: actions/checkout@v3
 
-      - name: Create and Copy files with SSH
+      - name: Deploy files via SSH
         env: 
           SSH_PRIVATE_KEY: ${{secrets.EC2_SSH_KEY}}
           REMOTE_HOST: ${{secrets.HOST}}
           REMOTE_USER: ${{secrets.USER}}
-          TARGET: "/"
         run: |
-          New-Item -Path $env:USERPROFILE\.ssh -ItemType Directory -Force
-          Set-Content -Path $env:USERPROFILE\.ssh\id_rsa -Value $env:SSH_PRIVATE_KEY
-          chmod 600 $env:USERPROFILE\.ssh\id_rsa
-  
-          ssh-keyscan -H $env:REMOTE_HOST | Out-File -Append -Encoding utf8 $env:USERPROFILE\.ssh\known_hosts
-          chmod 644 $env:USERPROFILE\.ssh\known_hosts
-  
-          # Cria um diretório temporário
-          $TEMP_DIR = Join-Path -Path $env:TEMP -ChildPath ([System.Guid]::NewGuid().ToString())
-  
-          # Cria o diretório
-          New-Item -Path $TEMP_DIR -ItemType Directory
-  
-          # Copia os arquivos do repositório para o diretório temporário
-          Copy-Item -Recurse -Path .\* -Destination $TEMP_DIR
-  
-          # Comprime os arquivos em um arquivo ZIP
-          Compress-Archive -Path $TEMP_DIR\* -DestinationPath $TEMP_DIR\files_to_copy.zip
-  
-          # Copia o arquivo ZIP para o host remoto
-          scp -i $env:USERPROFILE\.ssh\id_rsa -o StrictHostKeyChecking=no $TEMP_DIR\files_to_copy.zip $env:REMOTE_USER@$env:REMOTE_HOST:/path/to/destination
-  
-          # Extrai o arquivo ZIP no host remoto
-          ssh -i $env:USERPROFILE\.ssh\id_rsa -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "cd /path/to/destination ; Expand-Archive -Force files_to_copy.zip ."
-  
-          # Executa os comandos adicionais para iniciar a aplicação no Windows
-          ssh -i $env:USERPROFILE\.ssh\id_rsa -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "cd /path/to/destination ; Start-Process -NoNewWindow -FilePath 'C:\path\to\your\executable.exe'"
-  
-          # Remove o diretório temporário
-          Remove-Item -Path $TEMP_DIR -Recurse -Force
+          echo "$SSH_PRIVATE_KEY" > key.pem
+          chmod 600 key.pem
+
+          scp -i key.pem -o StrictHostKeyChecking=no -r ./* $REMOTE_USER@$REMOTE_HOST:/
+          ssh -i key.pem -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "cd / && Expand-Archive -Force files_to_copy.zip . && Start-Process -NoNewWindow -FilePath 'C:\'"
