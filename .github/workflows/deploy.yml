@@ -18,11 +18,24 @@ jobs:
           REMOTE_HOST: ${{secrets.HOST}}
           REMOTE_USER: ${{secrets.USER}}
         run: |
+          $keyFile = "$env:TEMP\key.pem"
           $remotePath = "/c/Users/Administrator/Desktop/PedalHubApi"
           
-          Set-Content -Path "$env:TEMP\known_hosts" -Value "$REMOTE_HOST ecdsa-sha2-nistp256 <HOST KEY HERE>"
+          Set-Content -Path $keyFile -Value $env:SSH_PRIVATE_KEY
           
           $scpOptions = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:TEMP\known_hosts"
           
-          ssh -i <(echo "$SSH_PRIVATE_KEY") $scpOptions "$($REMOTE_USER)@$($REMOTE_HOST)" "mkdir -p $remotePath"
-          scp -i <(echo "$SSH_PRIVATE_KEY") $scpOptions -r ./* "$($REMOTE_USER)@$($REMOTE_HOST):$remotePath"
+          # Cria o diretório remoto se não existir
+          ssh -i $keyFile $scpOptions "$($REMOTE_USER)@$($REMOTE_HOST)" "mkdir -p $remotePath"
+          
+          # Cria um diretório temporário local para armazenar os arquivos antes de enviá-los
+          $localTempDir = New-Item -Path $env:TEMP -Name "GitHubActionsTemp" -ItemType Directory -Force
+          
+          # Copia os arquivos para o diretório temporário local
+          Copy-Item -Path ./* -Destination $localTempDir -Recurse
+          
+          # Envia os arquivos para o diretório remoto
+          scp -i $keyFile $scpOptions -r $localTempDir/* "$($REMOTE_USER)@$($REMOTE_HOST):$remotePath"
+          
+          # Limpa o diretório temporário local
+          Remove-Item -Path $localTempDir -Recurse -Force
