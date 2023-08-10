@@ -11,10 +11,20 @@ interface CreateRideInput {
   additional_information?: string;
   start_place: string;
   participants_limit?: number;
+   
 }
 
 interface SubscribeRideInput {
   ride_id: number;
+}
+
+interface UpdateRideInput {
+  start_date?: string;
+  start_date_registration?: string;
+  end_date_registration?: string;
+  additional_information?: string;
+  start_place?: string;
+  participants_limit?: number;
 }
 
 export const createRide = (parent: any, args: { input: CreateRideInput }): Promise<Ride> => {
@@ -57,4 +67,13 @@ export const subscribeRide = async (parent: any, args: { input: SubscribeRideInp
       user: { connect: { id: context.req.user.id } }
     },
   });
+}
+
+export const updateRide = async (parent: any, args: {input: UpdateRideInput}, context: any): Promise< Ride > => {
+  if(!context.req.user) return null
+
+  const { input } = args
+
+  const user = context.req.user
+  return await prisma.ride.update({where: {createdById: user.id}, data: {input}})
 }

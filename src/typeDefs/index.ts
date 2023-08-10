@@ -53,6 +53,19 @@ export const typeDefs = `#graphql
     participants_limit: Int
   }
 
+  input UpdateRideInput {
+    start_date: String
+    start_date_registration: String
+    end_date_registration: String
+    additional_information: String
+    start_place: String
+    participants_limit: Int
+  }
+
+  input DeleteRideInput {
+    id: Int!
+  }
+
   input SubscribeRideInput {
     ride_id: Int!
   }
@@ -74,6 +87,8 @@ export const typeDefs = `#graphql
     updateUser(input: UpdateUserInput!): User!
     deleteUser: User!
     createRide(input: CreateRideInput!): Ride!
+    updateRide(input: UpdateRideInput!): Ride!
+    deleteRide(input: DeleteRideInput!): Ride!
     subscribeRide(input: SubscribeRideInput!): Subscription
     login(email: String!, password: String!): AuthPayload!
   }
