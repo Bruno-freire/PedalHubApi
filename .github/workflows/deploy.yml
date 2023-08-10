@@ -17,25 +17,4 @@ jobs:
           SSH_PRIVATE_KEY: ${{secrets.EC2_SSH_KEY}}
           REMOTE_HOST: ${{secrets.HOST}}
           REMOTE_USER: ${{secrets.USER}}
-        run: |
-          $keyFile = "$env:TEMP\key.pem"
-          $remotePath = "/c/Users/Administrator/Desktop/PedalHubApi"
-          
-          Set-Content -Path $keyFile -Value $env:SSH_PRIVATE_KEY
-          
-          $scpOptions = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:TEMP\known_hosts"
-          
-          # Cria o diretório remoto se não existir
-          ssh -i $keyFile $scpOptions "$($REMOTE_USER)@$($REMOTE_HOST)" "mkdir -p $remotePath"
-          
-          # Cria um diretório temporário local para armazenar os arquivos antes de enviá-los
-          $localTempDir = New-Item -Path $env:TEMP -Name "GitHubActionsTemp" -ItemType Directory -Force
-          
-          # Copia os arquivos para o diretório temporário local
-          Copy-Item -Path ./* -Destination $localTempDir -Recurse
-          
-          # Envia os arquivos para o diretório remoto
-          scp -i $keyFile $scpOptions -r $localTempDir/* "$($REMOTE_USER)@$($REMOTE_HOST):$remotePath"
-          
-          # Limpa o diretório temporário local
-          Remove-Item -Path $localTempDir -Recurse -Force
+          TARGET: "/c/Users"
