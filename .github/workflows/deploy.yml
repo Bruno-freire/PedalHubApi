@@ -18,8 +18,12 @@ jobs:
           REMOTE_HOST: ${{secrets.HOST}}
           REMOTE_USER: ${{secrets.USER}}
         run: |
-          echo "$SSH_PRIVATE_KEY" > key.pem
-          chmod 600 key.pem
-
-          scp -i key.pem -o StrictHostKeyChecking=no -r ./* $REMOTE_USER@$REMOTE_HOST:/
-          ssh -i key.pem -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "cd / && Expand-Archive -Force files_to_copy.zip . && Start-Process -NoNewWindow -FilePath 'C:\'"
+          $keyFile = "$env:TEMP\key.pem"
+          $remotePath = "/"
+          
+          Set-Content -Path $keyFile -Value $env:SSH_PRIVATE_KEY
+          Set-Content -Path $env:TEMP\known_hosts -Value "$REMOTE_HOST ecdsa-sha2-nistp256 <HOST KEY HERE>"
+          
+          $scpOptions = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:TEMP\known_hosts"
+          scp -i $keyFile $scpOptions -r .\* "$REMOTE_USER@$REMOTE_HOST:$remotePath"
+          ssh -i $keyFile $scpOptions "$REMOTE_USER@$REMOTE_HOST" "cd $remotePath ; Expand-Archive -Force files_to_copy.zip . ; Start-Process -NoNewWindow -FilePath 'C:\'"
