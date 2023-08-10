@@ -18,15 +18,11 @@ jobs:
           REMOTE_HOST: ${{secrets.HOST}}
           REMOTE_USER: ${{secrets.USER}}
         run: |
-          $keyFile = "$env:TEMP\key.pem"
-          
-          Set-Content -Path $keyFile -Value $env:SSH_PRIVATE_KEY
-          
           $remotePath = "/c/Users/Administrator/Desktop/PedalHubApi"
+          
+          Set-Content -Path "$env:TEMP\known_hosts" -Value "$REMOTE_HOST ecdsa-sha2-nistp256 <HOST KEY HERE>"
+          
           $scpOptions = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:TEMP\known_hosts"
           
-          # Cria o diretório remoto caso não exista
-          ssh -i $keyFile $scpOptions "$($REMOTE_USER)@$($REMOTE_HOST)" "mkdir -p $remotePath"
-          
-          # Copia os arquivos para o diretório remoto
-          scp -i $keyFile $scpOptions -r ./* "$($REMOTE_USER)@$($REMOTE_HOST):$remotePath"
+          ssh -i <(echo "$SSH_PRIVATE_KEY") $scpOptions "$($REMOTE_USER)@$($REMOTE_HOST)" "mkdir -p $remotePath"
+          scp -i <(echo "$SSH_PRIVATE_KEY") $scpOptions -r ./* "$($REMOTE_USER)@$($REMOTE_HOST):$remotePath"
