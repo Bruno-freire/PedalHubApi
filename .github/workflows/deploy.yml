@@ -17,6 +17,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{secrets.EC2_SSH_KEY}}
           REMOTE_HOST: ${{secrets.HOST}}
           REMOTE_USER: ${{secrets.USER}}
+          TARGET: "/"
         run: |
           New-Item -Path $env:USERPROFILE\.ssh -ItemType Directory -Force
           Set-Content -Path $env:USERPROFILE\.ssh\id_rsa -Value $env:SSH_PRIVATE_KEY
