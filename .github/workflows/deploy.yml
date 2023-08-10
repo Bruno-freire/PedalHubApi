@@ -1,15 +1,15 @@
-on:
-  push:
-    branches:
-      - main
+push:
+  branches:
+    - main
+
 jobs:
   deploy:
-    name: Deploy to EC2
-    runs-on: ubuntu-latest
+    name: Deploy to EC2 Windows
+    runs-on: windows-latest
 
     steps:
     - name: Checkout the files
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
     - name: Create and Copy files with SSH
       env: 
@@ -17,28 +17,23 @@ jobs:
         REMOTE_HOST: ${{secrets.HOST}}
         REMOTE_USER: ${{secrets.USER}}
       run: |
-        mkdir -p ~/.ssh  # Create the .ssh directory if it doesn't exist
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
+        New-Item -Path $env:USERPROFILE\.ssh -ItemType Directory -Force
+        Set-Content -Path $env:USERPROFILE\.ssh\id_rsa -Value $env:SSH_PRIVATE_KEY
+        chmod 600 $env:USERPROFILE\.ssh\id_rsa
 
-        ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts
-        chmod 644 ~/.ssh/known_hosts
+        ssh-keyscan -H $env:REMOTE_HOST | Out-File -Append -Encoding utf8 $env:USERPROFILE\.ssh\known_hosts
+        chmod 644 $env:USERPROFILE\.ssh\known_hosts
 
-        # Create a temporary directory to store the files to be copied
-        TEMP_DIR=$(mktemp -d)
+        $TEMP_DIR = New-TemporaryFile -Directory
+        Copy-Item -Recurse -Path .\* -Destination $TEMP_DIR.FullName
+        cd $TEMP_DIR.FullName
+        Compress-Archive -Path .\* -DestinationPath files_to_copy.zip
 
-        # Copy the necessary files to the temporary directory
-        cp -r ./ $TEMP_DIR/
+        scp -i $env:USERPROFILE\.ssh\id_rsa -o StrictHostKeyChecking=no files_to_copy.zip $env:REMOTE_USER@$env:REMOTE_HOST:/path/to/destination
 
-        # Compress the files into a zip archive
-        cd $TEMP_DIR
-        zip -r files_to_copy.zip .
+        ssh -i $env:USERPROFILE\.ssh\id_rsa -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "cd /path/to/destination ; Expand-Archive -Force files_to_copy.zip ."
 
-        # Copy the zip archive to the remote host's PedalHubApi directory
-        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no files_to_copy.zip $REMOTE_USER@$REMOTE_HOST:/home/ec2-user/PedalHubApi/
+        # Execute os comandos adicionais para iniciar a aplicação no Windows
+        ssh -i $env:USERPROFILE\.ssh\id_rsa -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "cd /path/to/destination ; Start-Process -NoNewWindow -FilePath 'C:\path\to\your\executable.exe'"
 
-        # Connect to the remote host and extract the files from the zip archive
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "cd /home/ec2-user/PedalHubApi && unzip -o files_to_copy.zip"
-
-        # Clean up - remove the temporary directory and zip archive
-        rm -rf $TEMP_DIR
+        Remove-Item -Path $TEMP_DIR.FullName -Recurse -Force
