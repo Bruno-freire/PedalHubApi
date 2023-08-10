@@ -22,7 +22,7 @@ jobs:
           
           Set-Content -Path $keyFile -Value $env:SSH_PRIVATE_KEY
           
-          $remotePath = "C:\Users\Administrator\Desktop\PedalHubApi"
+          $remotePath = "C:\Users\Administrator\Desktop"
           $scpOptions = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:TEMP\known_hosts"
           
           scp -i $keyFile $scpOptions -r ./* "$($REMOTE_USER)@$($REMOTE_HOST):$remotePath"
